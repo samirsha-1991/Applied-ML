@@ -1,4 +1,4 @@
-# University of Greenwich master in datascience
+# UK accident severity prediction model development using deep learning and traditional classifiers
 
  Executive summary
 It is important to identify the causes to accidents and make arrangements to minimize them since accidents cause a significant number of injuries and deaths every year. This report contains a detailed analysis of implementation and validation of machine learning models developed using traditional classification methods and deep learning to predict the likelihood of accidents occurring in UK. The data obtained from Emergency services of UK about accidents that occurred in UK 2019 were taken to train, validate and test the models. 
@@ -31,8 +31,10 @@ It can be observed that the
 
 •	majority of the accidents fall under the 'Slight' severity category. 
 
-•	The next prevalent category is 'Severe'. 
+•	The next prevalent category is 'Severe'.
+
 •	number of samples in the 'Fatal' category is significantly lower. 
+
 Therefore, to avoid biased performance, poor generalization, and overfitting to the dominant class, it is imperative to address the class imbalance before feeding the data into the model.
 
  
@@ -67,7 +69,7 @@ As per Figure 3,
 
 •	Majority of the ‘Slight’ category accidents are happened at a vehicle speed of 30kmph. 
 
-1.3  Checking for missing or duplicate values
+### 1.3  Checking for missing or duplicate values
 
 •	There are missing values in label dataset as well as in ‘age_of_oldest_driver’.
 
@@ -77,7 +79,7 @@ Table 3: Missing values in variables
 
 •	Also there are 1172 duplicate entries in the total dataset
 
-1.4 2D visualization of the dataset using principal components
+### 1.4 2D visualization of the dataset using principal components
 
 ![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/7f5659b5-7d80-469d-a803-032b07612747)
 
@@ -106,12 +108,14 @@ The observed data impurities in the section 1, should be removed before proceedi
 1.	Replacing ‘serious’, ‘slight’ and ‘fatal’ categories by ‘Serious’, ‘Slight’ and  ‘Fatal’ respectively assuming they all convey the same category
 2.	Remove all the duplicates from the dataset. After removing all, the current dataset has 30475 entries
 3.	Dropping the entries with invalid data types. 
-•	Here the 194 entries with age of the driver below 18 are dropped without further processing hence these records are doubtful
-•	Entry with Minimum speed recorded -1 is dropped
+4.	
+•		Here the 194 entries with age of the driver below 18 are dropped without further processing hence these records are doubtful
+
+•		Entry with Minimum speed recorded -1 is dropped
 
 After all above data cleaning the current dataset includes 30280 entries. 
 
-2.2. splitting (training/validation/test)
+### 2.2. splitting (training/validation/test)
 
 Before proceeding in to data pre-processing dataset should be split to train, test and validation to minimize the data leakage. 
 Target variable contains 1172 missing values and has class imbalance. 
@@ -121,12 +125,10 @@ Considering above, since stratified sampling should be applied to maintain the s
 Considering the percentage of missing values in the target variable which is 3% (=1172/31647) it seems ok to drop those rows.
 Now the total dataset has 29148 entries and then split the dataset with below percentages. 
 
-Splitting
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/44fcfeb2-dec4-490a-aef1-732b2b8ec1ac)
 
-	Train	Test	Validation
-% of records	80%	20%	10% from train data
 
-2.3 Handling missing values
+### 2.3 Handling missing values
 
 Numerical columns 
 
@@ -143,7 +145,7 @@ o	Easy and fast
 
 In both above cases SimpleImputer will be fit only to the training dataset, calculate the mean/ mode and then transform validation and test set to avoid data leakage. 
 
-2.4 Feature scaling for the numerical values
+### 2.4 Feature scaling for the numerical values
 
 Values in numerical columns 'speed_limit', 'age_of_oldest_driver' are scaled to have zero mean and unit variance using StandardScaler.
 
@@ -152,7 +154,7 @@ Index	speed_limit	age_of_oldest_driver
 12708	-0.474343644	1.38E-16
 26435	-0.474343644	0.391025162
 
-2.5 Columns transform
+### 2.5 Columns transform
 
 The ML models need data in numerical forms and hence need to transform categorical variables to numerical. 
 There are 2 options
@@ -167,63 +169,32 @@ Encoders are only fit to training set and used for the transformation of trainin
 
 Now there are 30 columns in the X dataset after the encoding. 
 
-2.6 Random over sampling
+### 2.6 Random over sampling
 
 In section 1, observed  a class imbalance that is needed to be addressed during the data pre-processing stage. 
 
 For that “Random over sampling” is used where sample count in all the 3 classes matched to that of category “Slight” (largest class)  by randomly duplicating samples from the minority classes. 
-accident_severity	 Class percentage before oversampling	Class percentage after oversampling
-Slight	42%	33%
-Serious	38%	33%
-Fatal	20%	33%
 
-
--
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/f10554aa-276a-41db-a1ed-1eb17d35bcdb)
 
 
 
+## 3.	Classification using traditional machine learning
 
-
-
-
-3.	Classification using traditional machine learning
-
-3.1 Pipelines
+### 3.1 Pipelines
 
 Pipeline can be used to chain multiple estimators into one (scikit-learn, n.d.). In this case the pipeline (imbalance pipeline to address class imbalance) is used with below steps
 1.	RandomOverSampler
 2.	Classifier
 
 
-3.2 Final selected model
+### 3.2 Final selected model
 
 
 After analysing and comparing the performance (balanced accuracy metric) among few classification models, the final selected model is “RandomForest Classifier”. 
 Below are the finalized model hyper parameters 
 
-Table 4: Final hyperparameters of random forest classifier
-Hyperparameter	Value	Description
-n_estimators	775	Trees count in the forest.
-•	Helps in reducing the variance and improve the generalization of the model. If 
-	Too high  overfitting and time consuming
-	Low  underfitting
-Criterion / impurity	Gini 	Quantify the impurity of a given subset of data at a node based on the proportion of different classes or labels. 
-•	The impurity is high when a node contains mix of instances from different classes or labels.
-•	Used to split the data at each node so that the impurity is reduced after the split
-•	Gini entropy calculated as below 
- 
-Pmk= proportion of class k observations in node m
-max_depth	11	The number of nodes from root node to the farthest leaf node in a single decision tree
-•	If too high, the model tends to overfit 
-•	If too low, model performance is degraded
-oob_score	False	use out-of-bag samples or observations which have not been
-used to grow the tree (Niladri Syam and Kaul, 2021) to estimate the generalization score
-min_samples_split	9	If a node has fewer samples than this,  it will not be split further, and the splitting process will stop for that branch.
-•	If too high, underfitting with low model complexity
-•	Low, overfitting
-max_features	sqrt	The features count to consider when looking for the best split
-•	Sqrt: number of features considered for splitting at each node is the square root of the total number of features
-class_weight	'balanced'	Weights are adjusted so that they are inversely proportional to class frequencies
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/c494a43d-3e31-418c-9cd2-c8df1c81c781)
 
 
 Random Forest is an ensemble learning method (combines multiple models to improve the predictive performance of the overall system ) that makes use of bagging to improve the performance and accuracy of the classification. The Random Forest algorithm works by creating multiple decision trees on different subsets of the dataset using a technique called bootstrap aggregation (bagging). The algorithm randomly samples the dataset and feeds these samples separately to each decision tree. The out-of-bag (non-selected) samples are then used to generalize the model.
@@ -232,7 +203,7 @@ At each node of the decision tree, the algorithm selects the best feature to spl
 Once all the decision trees are created, classification happens by voting. Each decision tree classifies the data point, and the class with the most votes across all the trees is the final classification.
 Random Forest also integrates class weight to balance the distribution of samples in the dataset. This is important when the dataset is imbalanced, and one class dominates the dataset. By assigning weights to each class, the algorithm gives more importance to underrepresented classes, which improves the accuracy of the classification.
 
-3.3 Experimental analysis
+### 3.3 Experimental analysis
 
 1.	Comparison among models to find the most appropriate model
 
@@ -244,6 +215,8 @@ o	Provide good accuracy for imbalanced classes.
 
 Below is the comparison in final test balanced accuracy. 
 
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/1281ba89-4da9-4cc7-8a8e-6f7b2f53002a)
+
 
 Figure 5: Accuracy comparison among the models
 As per Figure 5, the highest balanced accuracy is given by the Random forest models and hence selected it for the classification task. 
@@ -252,19 +225,8 @@ As per Figure 5, the highest balanced accuracy is given by the Random forest mod
 
 i.	Defining search space
 
-hyperparameter	space	Reason for range specification
-n_estimators / Number of trees	1 to 1000	** higher number  better performance
-                                      increases computational cost 
-                                      can overfit
-** 1-1000 is reasonable
-min_samples_split	2 to 10	** if low  overfitting
-** if high  underfitting. 
-** 1-20 is reasonable
-max_depth	1 to 20	
-criterion	'gini', 'entropy', 'log_loss'	
-** available options to select the optimum 
-Max_features	'sqrt','log2',None	
-Oob_score	True or False	** whether including OOB samples can be computationally efficient and can help estimate performance on new data
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/1abfb7db-187c-4968-b596-296ae02299c2)
+
 
 
 ii.	The hyperparameter tuning was done using “Randomized Parameter Optimization” to increase the efficiency over exhaustive Grid Search which exhaustively generates candidates from a parameter grid.
@@ -276,22 +238,18 @@ iv.	Hyperparameter prioritization:
 
 Table 5: Hyperparameter tuning stages random forest classifier
 
-Model	Hyperparameters included in the search space	Balanced Accuracy (test)
-	Criterion	Tree count	Max depth	min_samples_
-split	oob_score	max_features	min_samples
-leaf	
-RF_1	X	X	X					79.6%
-RF_2	X	X	X	X				79.89%
-RF_3	X	X	X	X	X	X		80.00%
-RF_4	X	X	X	X			X	79.79%
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/18f376bf-a9c6-4e3d-a184-03b1b5a25bd7)
 
-Table 3 shows the 4 stages of hyperparameter tuning in the random forest model. At each phase different set of hyperparameters are fed to the random seach space to reduce overfitting and finding the optimum 
+
+Table 5 shows the 4 stages of hyperparameter tuning in the random forest model. At each phase different set of hyperparameters are fed to the random seach space to reduce overfitting and finding the optimum 
 if all parameters are included in the search space there is a high chance of model getting overfit.  
+
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/6a01c3bd-996d-4b92-ae00-4db11d109aec)
 
 
 Figure 6: Accuracy change in each phase of tuning
 
-Above Figure 5 shows 
+Above Figure 6 shows 
 	how training, validation and test balance accuracy value variation for the 4 stages
 	RF_3 has the highest balanced accuracy on test data with least overfitting
 	In model 4 (RF_4) model gets highly overfit.
@@ -299,21 +257,18 @@ Above Figure 5 shows
 
 
 
+### 3.4 Model evaluation
 
-
-
-
-
-
-3.4 Model evaluation
-
-3.4.1. Confusion matrix
+#### 3.4.1. Confusion matrix
 
 As per the confusion matrix in Figure 7, majority of the samples are predicted correctly but some of the predictions are inaccurate mainly in classes Severe and Fatal. 
 
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/a48fe7ff-b376-449e-bb25-b48ee3534746)
+
 
 Figure 7: Confusion matrix for final selected model
-3.4.2. Performance metrics
+
+#### 3.4.2. Performance metrics
 
 Below metrics are used to assess the accuracy of the model other than the balanced accuracy. 
 
@@ -336,10 +291,9 @@ o	TP / (TP + FN)
 
 
 The model has below precision and recall values for the 3 classes 
- 	Precision	recall
-Slight	0.62	0.94
-Serious	0.82	0.71
-Fatal	0.86	0.75
+ 
+ ![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/a6bff581-d200-4368-ade6-63b9af305ce7)
+
 
 Discussion
 The recall for class ‘Slight’ is very low and precision is high compared to others meaning, models is bit biased to predict the majority class Slight. 
@@ -362,44 +316,16 @@ Conclusion :
 
 
 
+## 4. Classification using neural networks
 
-
-
-
-4. Classification using neural networks
-
-4.1 Final selected model
+### 4.1 Final selected model
 
 The final selected model from is Sequential Recurrent Neural networks. The finalized model parameters as per below and the final model balance accuracy on test data is 79.45%
 
 Table 6: Final hyperparameters of sequential NN
 
-Hyperparameter	Value	Description
-Neurons count	Input layer- 30
-Dense layer 1- 20
-Dense layer 2- 10
-Output layer - 3	Number of nodes in the hidden layer.
-•	Basic computational unit which process information
-•	If too high more complex the model and overfitting can be happened
-•	If too low, model may failed to learn patterns from data and hence underfit 
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/135d89e9-b8f0-4a21-8d95-0e4d76e41d99)
 
-Layers	7	collection of neurons
-•	Building block of a NN and extract representations out of the data fed into them
-•	Each layer is connected with next and previous layers
-•	Last layer is a 3 way softmax layer which outputs an array of 3 probabilities which sum up to 1.  (Chollet, 2018)
-Loss	SparseCategoricalCrossentropy	Used by the network to measure the performance on training data and adjust the hyperparameters on reducing the loss function
-•	Sparse categorical entropy computes the cross-entropy between the predicted probability distribution and the true probability distribution
-Optimizer	SGD	The mechanism through which the network update itself depending on the loss function and data. 
-Optimizer learning rate	0.01	step size at which the optimizer updates the weights of the model during training
-Activation function	Relu	A mathematical function which is applied to the output of every layer to introduce non-linearity so that the network can model complex patterns in data. 
-•	ReLU function returns the input if it is positive, and 0 otherwise
-•	Simple and effective.
-Batch size 	48	determines how many samples are processed at a time before the model updates its weights.
-•	If large, faster training and high computation resource requirement
-Epochs count	50	number of times the entire training dataset is passed through the neural network during the training process. Each epoch consists of multiple batches of data,
-Drop out	0.3	Regularization technique
-•	“Dropout, applied to a layer, consists of randomly dropping out
-(setting to zero) a number of output features of the layer during training.” (Chollet, 2018)
 
 In above neural network model the input layer of the model has 30 nodes that receive the input features. The dense layers with ReLU activation function that applies a linear transformation to the input data and introduces non-linearity to the model. The output layer has 3 nodes with the softmax activation function that outputs the predicted probabilities for each class.
 
@@ -409,7 +335,7 @@ To prevent overfitting, 3 dropout layers with dropout rates  of 0.3 are added wh
 
 After training, the model is evaluated on a separate validation or test dataset to assess its performance. The model makes predictions on the test data, and the balanced accuracy metrics are calculated to determine how well the model generalizes to new data since there is a class imbalance in the dataset. Finally, the model can be used to make predictions on new, unseen data to classify the severity of accidents based on their features.
 
-4.2 Experimental analysis
+### 4.2 Experimental analysis
 
 In selecting the optimum model 2 steps were done
 
@@ -422,6 +348,7 @@ The sequential model’s performance is  compared with 1 dimensional convolution
 •	Selected sequential model
 
 
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/0caa5179-696d-4244-b113-6b13abe7a96c)
 
 
 Figure 8: Architecture of the used CNN 1D model
@@ -439,42 +366,28 @@ o	Another change done here is the incorporation of ‘Early stopping’ which is
 
 
 
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/256aeef7-5f02-4245-b158-48999fc36bbb)
 
-
-
-
-
-
-Table 7: stages of hyperparameter tuning
-	Neurons count	Drop
-Out layers	
-Activation	
-Optimizer	
-Learning
-rate	
-Epochs	
-Batch size	Balance Accuracy
-(Test)
-	Input layer	Dense layer 1	Dense layer 2	Output layer							
-Simple model	30	10	-	3	No	Relu	Relu	Relu	25	64	78.47%
-Model 1	50	10		3	2	Relu	Relu	Relu	50	32	79.31%
-Model 2	20	20	10	3	3	Relu	Relu	Relu	50	48	79.45%
 
 The best model was chosen to be Model 3 with highest balance accuracy and its hyperparameters given in details in table 6. 
+
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/0c922e89-a697-4fe8-bb51-4186b280787a)
 
 Figure 9: Training, validation accuracy and loss variation with the epochs in final sequential model
 Figure 9 shows how the validation error reduce and accuracy improves with the epoch count. 
 
+![image](https://github.com/samirsha-1991/Applied-ML/assets/131381690/bfeb8ac8-425f-4327-bde7-0a38d6f1aed4)
+
 
 Figure 10: Accuracy comparison among the built and trained NN models
 
-4.3	Model evaluation
+### 4.3	Model evaluation
 
-4.3.1	Confusion matrix
+#### 4.3.1	Confusion matrix
 Figure 11: Confusion matrix for the selected sequential model
 As per the confusion matrix in Figure 9, majority of the samples are predicted correctly but some of the predictions are inaccurate mainly in classes Severe and Fatal. 
 
-4.3.2	Performance metrics
+#### 4.3.2	Performance metrics
 
 The model has below precision and recall values for the 3 classes and comparison with the RF classifier
 
@@ -490,18 +403,7 @@ All the scores are almost same for both models but there is a slight increment i
 
 
 
-4.3.3. comparison with one “trivial” baseline
-
-Trivial baseline:
-
-always predict the majority class, which is "slight" 
-
-As discussed in section 3.4.2 the trivial balanced accuracy = 0.33% and since the NN model accuracy is 79.45%
-•	Final model performs better than the trivial baseline
-•	Model has learned meaningful insights and patterns from the data and it's providing accurate predictions. 
-
-
-5. Ethical discussion
+## 5. Ethical discussion
 Below mentioned are some of the social and ethical implications which can take place using the above finalized ML model in predicting the severity of road accidents organized using the Data Hazard Labels framework.
 1.	Data collection phase
 •	Hazard: Reinforces Existing Biases
@@ -518,7 +420,7 @@ o	Used evaluation metrics that are easily interpretable and explainable, such as
 o	Use machine learning models that are transparent and explainable, random forest and neural networks with this documentation which can be used as guide to understand how the model is working and model’s prediction for the stakeholders. 
 
 
-6. Recommendations
+## 6. Recommendations
 
 6.1 Machine learning model which is the best candidate for the task and reasons
 
@@ -528,28 +430,25 @@ Random.
 
 2.	Interpretability: Random Forest is also relatively easy to interpret as compared to other models such as neural networks..
 
-3.	Computational efficiency: Random Forest is also computationally efficient and can handle large datasets with high dimensionality. 
-6.2 Whether the final model is good enough to be used in practice and why.
+3.	Computational efficiency: Random Forest is also computationally efficient and can handle large datasets with high dimensionality.
+
+
+### 6.2 Whether the final model is good enough to be used in practice and why.
 
 Since the accuracy of the model is 80% which implies that every 100 predictions the model makes there is an 20 erroneous predictions. An 80% accuracy may not be sufficient for a critical scenario like predicting accident severity, as it could lead to erroneous predictions and result in the wrong decisions being made by the authorities. Therefore, a higher accuracy would be desirable to ensure the model's predictions are more reliable, and it could be necessary to explore further model tuning or collecting more data to achieve this
 
-6.3 Top suggestion for future improvements 
+### 6.3 Top suggestion for future improvements 
 
 Incorporating more contextual information
 The dataset can be enriched with contextual information like traffic patterns, and driver behaviour, which can help improve the model's accuracy. Collecting more data can help to improve the model's performance. More data can provide the model with additional insights that could enhance the accuracy of the predictions.
 
 
-7. Retrospective
+## 7. Retrospective
 
 Model interpretation: Understanding how each of the model arrives at its predictions is important for building trust in the model and ensuring its fairness. Will invest more time in investigating different model interpretation techniques and explore how they can be used to gain insights into the model's decision-making process.
 
 
-
-
-
-
-
-8. References
+## 8. References
 1.	Makwana, K. (2021). Frequent Category Imputation (Missing Data Imputation Technique). [online] Geek Culture. Available at: https://medium.com/geekculture/frequent-category-imputation-missing-data-imputation-technique-4d7e2b33daf7.  (Accessed on : 31-03-2023)
 2.	Mirjalili, S. (2019). PYTHON MACHINE LEARNING - THIRD EDITION : machine learning and deep learning with python, scikit... -learn, and tensorflow 2. S.L.: Packt Publishing Limited
 3.	scikit-learn. (n.d.). 6.1. Pipelines and composite estimators. [online] Available at: https://scikit-learn.org/stable/modules/compose.html#pipeline. (Accessed on : 31-03-2023)
