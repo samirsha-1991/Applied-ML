@@ -1,6 +1,6 @@
 # UK accident severity prediction model development using deep learning and traditional classifiers
 
- Executive summary
+
 It is important to identify the causes to accidents and make arrangements to minimize them since accidents cause a significant number of injuries and deaths every year. This report contains a detailed analysis of implementation and validation of machine learning models developed using traditional classification methods and deep learning to predict the likelihood of accidents occurring in UK. The data obtained from Emergency services of UK about accidents that occurred in UK 2019 were taken to train, validate and test the models. 
 The report contains detail description on each step followed in analyzing the above problem including exploratory data analysis, data preprocessing, handling class imbalance, feature engineering, model training using algorithms like decision trees,  gradient decent classifier, random forest and neural networks along with the obtained accuracy metric values. In obtaining the best hyperparameters,  Grid search was used and several iterations of searching was done in finetuning the parameters. The best model is selected after optimizing the hyperparameters and comparing with other models. 
 Results show that the best traditional classifier is Random forest with an accuracy of 80%. Additionally the report includes an ethical discussion about the applicability of the model in real world and areas to be improved and recommendations. 
